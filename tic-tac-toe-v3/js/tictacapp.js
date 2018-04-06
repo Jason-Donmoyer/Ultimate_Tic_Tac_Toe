@@ -32,6 +32,7 @@ let PlayerTwo = {
 	checkedBoxes: []
 };
 
+
 function startGame () {
 	// Hides the game board on start
 
@@ -90,6 +91,62 @@ function isTie () {
 // 		} 
 // 	}
 // }
+let isEqual = function (winVal, playerVal) {
+	// get value of the type
+	let type = Object.prototype.toString.call(winVal);
+
+	// if the two objects are not the same type, return false
+	if (type !== Object.prototype.toString.call(playerVal)) return false;
+
+	// if items are not arrays or objects, return false
+	if (['[object Array]', '[object Object]'].indexOf(type) < 0) return false;
+
+	// compare length of items
+	let winValLen = type === '[object Array]' ? winVal.length : Object.keys(winVal).length;
+	let playerValLen = type === '[object Array]' ? playerVal.length : Object.keys(playerVal).length;
+	if (winValLen !== playerValLen) return false;
+
+	// comparing items
+	let compare = function (foo, bar) {
+		let itemType = Object.prototype.toString.call(foo);
+		if (['[object Array]', '[object Array]'].indexOf(itemType) >= 0) {
+			if (!isEqual(foo, bar)) return false;
+		} else {
+			if (itemType !== Object.prototype.toString.call(bar)) return false;
+		}
+	};
+
+	// comparing properties
+	let match;
+	if (type === '[object Array]') {
+		for (let i = 0; i < winValLen; i++) {
+			if (compare(winVal[i], playerVal[i]) === false) return false;
+		}
+	} else {
+		for (var key in winVal) {
+			if (winVal.hasOwnProperty(key)) {
+				if (compare(winVal[key], playerVal[key]) === false) return false;
+			}
+		}
+	}
+
+	// if nothing failed return true
+	return true;
+};
+
+// loop through arrays to check for equality
+function checkWinner (player) {
+	if (turns >= 3) {
+		for (let i = 0; i < winningCombos.length; i++) {
+			if (isEqual(winningCombos[i], player.checkedBoxes)) {
+				console.log("Winner");
+				break;
+			}
+		} 
+	}	
+}
+
+
 
 // creates the basic functionality of the game
 
@@ -118,6 +175,7 @@ for (let i = 0; i < boxes.length; i++) {
 			PlayerOne.checkedBoxes.push(boxes[i].id);
 			turns++
 			//isWinner(PlayerOne);
+			checkWinner(PlayerTwo);
 			switchTurn(PlayerOne, PlayerTwo);
 			
 		} else if (PlayerTwo.isActive) {
@@ -125,6 +183,7 @@ for (let i = 0; i < boxes.length; i++) {
 			PlayerTwo.checkedBoxes.push(boxes[i].id);
 			turns++
 			//isWinner(PlayerTwo);
+			checkWinner(PlayerTwo);
 			switchTurn(PlayerTwo, PlayerOne);	
 			
 		}
