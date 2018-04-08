@@ -7,6 +7,7 @@ const newGameButton = document.querySelector('#newGameButton');
 const boxes = document.querySelectorAll('.box');
 let turns = 0;
 const winScreen = document.querySelector('#finish');
+let message = document.querySelector('.message');
 
 // array of all possible winning combinations
 const winningCombos = [
@@ -23,6 +24,7 @@ const winningCombos = [
 // player objects
 
 let PlayerOne = {
+	name: String,
 	isTurn: document.querySelector('#player1'),
 	isActive: false,
 	checkedBoxes: [],
@@ -30,6 +32,7 @@ let PlayerOne = {
 };
 
 let PlayerTwo = {
+	name: String,
 	isTurn: document.querySelector('#player2'),
 	isActive: false,
 	checkedBoxes: [],
@@ -43,8 +46,10 @@ function startGame () {
 	gameScreen.style.display = "none";
 	winScreen.style.display = "none";
 
+
 	// Hides the start screen and displays the game board
 	startButton.addEventListener('click', function() {
+		PlayerOne.name = prompt("Please enter your name:");
 		startScreen.style.display = 'none';
 		gameScreen.style.display = '';
 	});
@@ -62,8 +67,13 @@ function displayWin () {
 	startScreen.style.display = "none";
 	if (PlayerOne.isWinner) {
 		winScreen.classList.add('screen-win-one');
+		message.innerText = PlayerOne.name + " Wins!";
 	} else if (PlayerTwo.isWinner) {
 			winScreen.classList.add('screen-win-two');
+			message.innerText = "Player Two Wins!";
+	} else {
+		winScreen.classList.add('screen-win-tie');
+		message.innerText = "It's A Tie!";
 	}
 	
 	winScreen.style.display = '';
@@ -99,8 +109,7 @@ function switchTurn (x, y) {
 // Shows the game tied screen
 function isTie () {
 	if (turns === 9 && !PlayerOne.isWinner && !PlayerTwo.isWinner) {
-			alert("It's a Tie");
-			restartGame();
+		displayWin();
 		}
 }
 
@@ -190,11 +199,9 @@ for (let i = 0; i < boxes.length; i++) {
 			
 		}
 			boxes[i].removeEventListener('click', click);
+		});
 			
-			
-			});
-			
-		};
+	};
 	
 
 startGame();
