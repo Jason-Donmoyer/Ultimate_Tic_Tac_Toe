@@ -3,8 +3,12 @@
 const gameScreen = document.querySelector('#board');
 const startScreen = document.querySelector('#start');
 const startButton = document.querySelector('.button');
+const newGameButton = document.querySelector('#newGameButton');
 const boxes = document.querySelectorAll('.box');
 let turns = 0;
+const winScreen = document.querySelector('#finish');
+
+// array of all possible winning combinations
 const winningCombos = [
 				["1", "2", "3"],
 				["4", "5", "6"],
@@ -16,27 +20,28 @@ const winningCombos = [
 				["3", "5", "7"]
 				];
 
-
-//const playerOne = document.querySelector('#player1');
-//const playerTwo = document.querySelector('#player2');
+// player objects
 
 let PlayerOne = {
 	isTurn: document.querySelector('#player1'),
 	isActive: false,
-	checkedBoxes: []
+	checkedBoxes: [],
+	isWinner: false
 };
 
 let PlayerTwo = {
 	isTurn: document.querySelector('#player2'),
 	isActive: false,
-	checkedBoxes: []
+	checkedBoxes: [],
+	isWinner: false
 };
 
-
+// function to begin or refresh the game
 function startGame () {
 	// Hides the game board on start
 
 	gameScreen.style.display = "none";
+	winScreen.style.display = "none";
 
 	// Hides the start screen and displays the game board
 	startButton.addEventListener('click', function() {
@@ -44,6 +49,29 @@ function startGame () {
 		gameScreen.style.display = '';
 	});
 	goesFirst();
+}
+
+// Reloads the page
+function restartGame() {
+	location.reload();
+}
+
+// Displays winning screen
+function displayWin () {
+	gameScreen.style.display = "none";
+	startScreen.style.display = "none";
+	if (PlayerOne.isWinner) {
+		winScreen.classList.add('screen-win-one');
+	} else if (PlayerTwo.isWinner) {
+			winScreen.classList.add('screen-win-two');
+	}
+	
+	winScreen.style.display = '';
+	
+	newGameButton.addEventListener('click', function() {
+		restartGame();
+	});
+
 }
 
 // Function to pick who goes first
@@ -68,85 +96,57 @@ function switchTurn (x, y) {
 		y.isActive = true;
 }
 
+// Shows the game tied screen
 function isTie () {
-	if (turns === 9) {
-		alert("It's a Tie");
-		startScreen.style.display = '';
-		// PlayerOne.isTurn.classList.remove('active');
-		// PlayerTwo.isTurn.classList.remove('active');
-		// for (let i = 0; i <= turns; i++ ) {
-		// boxes[i].classList.remove('box-filled-1');
-		// boxes[i].classList.remove('box-filled-2');
-		// }
-		startGame();
-	}
+	if (turns === 9 && !PlayerOne.isWinner && !PlayerTwo.isWinner) {
+			alert("It's a Tie");
+			restartGame();
+		}
 }
 
-// function isWinner (x) {
-// 	for (let i = 0; i < x.checkedBoxes; i++) {
-// 		if (x.checkedBoxes.sort()[0] === winningCombos[0][0] &&
-// 			x.checkedBoxes.sort()[1] === winningCombos[0][1] &&
-// 			x.checkedBoxes.sort()[2] === winningCombos[0][2]) {
-// 			console.log("Win");
-// 		} 
-// 	}
-// }
-let isEqual = function (winVal, playerVal) {
-	// get value of the type
-	let type = Object.prototype.toString.call(winVal);
-
-	// if the two objects are not the same type, return false
-	if (type !== Object.prototype.toString.call(playerVal)) return false;
-
-	// if items are not arrays or objects, return false
-	if (['[object Array]', '[object Object]'].indexOf(type) < 0) return false;
-
-	// compare length of items
-	let winValLen = type === '[object Array]' ? winVal.length : Object.keys(winVal).length;
-	let playerValLen = type === '[object Array]' ? playerVal.length : Object.keys(playerVal).length;
-	if (winValLen !== playerValLen) return false;
-
-	// comparing items
-	let compare = function (foo, bar) {
-		let itemType = Object.prototype.toString.call(foo);
-		if (['[object Array]', '[object Array]'].indexOf(itemType) >= 0) {
-			if (!isEqual(foo, bar)) return false;
-		} else {
-			if (itemType !== Object.prototype.toString.call(bar)) return false;
+// helper function for loop to check for winner
+function checkBoxes (player, i) {
+	if (player.checkedBoxes.includes(winningCombos[i][0]) &&
+		 	player.checkedBoxes.includes(winningCombos[i][1]) && 
+		 	player.checkedBoxes.includes(winningCombos[i][2])) {
+			player.isWinner = true;
+			displayWin();
+			
 		}
-	};
-
-	// comparing properties
-	let match;
-	if (type === '[object Array]') {
-		for (let i = 0; i < winValLen; i++) {
-			if (compare(winVal[i], playerVal[i]) === false) return false;
-		}
-	} else {
-		for (var key in winVal) {
-			if (winVal.hasOwnProperty(key)) {
-				if (compare(winVal[key], playerVal[key]) === false) return false;
-			}
-		}
-	}
-
-	// if nothing failed return true
-	return true;
-};
+}
 
 // loop through arrays to check for equality
 function checkWinner (player) {
-	if (turns >= 3) {
+	// let n = player.checkedBoxes.sort();
+	if (turns > 2) {
 		for (let i = 0; i < winningCombos.length; i++) {
-			if (isEqual(winningCombos[i], player.checkedBoxes)) {
-				console.log("Winner");
-				break;
-			}
-		} 
-	}	
+			
+			for (let j = 0; j < winningCombos[i].length; j++) {
+				if (player.checkedBoxes[j] === "1") {
+					checkBoxes(player, i);
+					break;
+				} else if(player.checkedBoxes[j] === "2") {
+					checkBoxes(player, i);
+					break;
+				} else if(player.checkedBoxes[j] === "3") {
+					checkBoxes(player, i);
+					break;
+				} else if(player.checkedBoxes[j] === "4") {
+					checkBoxes(player, i);
+					break;
+				} else if(player.checkedBoxes[j] === "7") {
+					checkBoxes(player, i);
+					break;
+					
+				} else if (turns === 9 && !PlayerOne.isWinner && !PlayerTwo.isWinner) {
+					alert("It's a Tie");
+					restartGame();
+				}
+			} 
+		}
+	} 
 }
-
-
+ 
 
 // creates the basic functionality of the game
 
@@ -173,27 +173,32 @@ for (let i = 0; i < boxes.length; i++) {
 		if (PlayerOne.isActive) {
 			boxes[i].classList.add('box-filled-1');
 			PlayerOne.checkedBoxes.push(boxes[i].id);
+			PlayerOne.checkedBoxes.sort();
 			turns++
-			//isWinner(PlayerOne);
-			checkWinner(PlayerTwo);
+			checkWinner(PlayerOne);
+			isTie();
 			switchTurn(PlayerOne, PlayerTwo);
 			
 		} else if (PlayerTwo.isActive) {
 			boxes[i].classList.add('box-filled-2');
 			PlayerTwo.checkedBoxes.push(boxes[i].id);
+			PlayerTwo.checkedBoxes.sort();
 			turns++
-			//isWinner(PlayerTwo);
 			checkWinner(PlayerTwo);
+			isTie();
 			switchTurn(PlayerTwo, PlayerOne);	
 			
 		}
 			boxes[i].removeEventListener('click', click);
-			isTie();
+			
+			
 			});
+			
 		};
 	
 
 startGame();
+
 
 
 
